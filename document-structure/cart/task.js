@@ -20,6 +20,7 @@ elementInc.forEach((element) => {
 
 const elementAdd = document.querySelectorAll('.product__add');
 elementAdd.forEach((element) => {
+    // обработчики событий для кнопок добавить
     element.addEventListener('click', (event) => {
         // получили значение переменных данного поля
         const id = element.closest('.product').dataset.id;
@@ -39,6 +40,10 @@ elementAdd.forEach((element) => {
             // если элемент уже есть в корзине увеличиваем значение переменной
             const count = productBasket.querySelector('.cart__product-count');
             count.textContent = Number(count.textContent) + Number(value);
+            const cords = cordsRectangle(event.target);
+            const rectangle = addImageMove(url, cords);
+            moveImage(rectangle, cords, productBasket);
+            localStorage.setItem(`basketStorage`, basket.innerHTML);
         } else {
             // если элемента нет в корзине создаем его в ней
             const text = `
@@ -51,24 +56,10 @@ elementAdd.forEach((element) => {
             basket.insertAdjacentHTML('afterbegin', text);
             const elementBasket = basket.querySelector('.cart__product');
             viewBasket();
-            const cords = cordsRectangle(event.target, elementBasket);
-            // console.log(cords);
+            const cords = cordsRectangle(event.target);
             const rectangle = addImageMove(url, cords);
-            // console.log(rectangle);
-            moveImage(rectangle, cords);
-            // создаем кнопку для уменьшения количества товара для текущего элемента
-            const decrise = basket.querySelector('.cart__product-decrise');
-            decrise.addEventListener('click', (event) => {
-                // обработчик события для уменьшения количества товара в корзине
-                const newValue = event.target.parentElement.querySelector('.cart__product-count');
-                newValue.textContent = Number(newValue.textContent) - 1;
-                if (newValue.textContent == '0') {
-                    // удаление элемента из корзины
-                    const deleteElement = event.target.parentElement;
-                    deleteElement.outerHTML = '';
-                    viewBasket();
-                }
-            });
+            moveImage(rectangle, cords, elementBasket);
+            deleteButton(basket);
         }
     });
 });
@@ -76,7 +67,9 @@ elementAdd.forEach((element) => {
 function viewBasket() {
     // обновление состояния видимости корзины
     const cart = document.querySelector('.cart');
-    const lenghtList = cart.querySelector('.cart__products').children.length;
+    const basket = document.querySelector('.cart__products');
+    localStorage.setItem(`basketStorage`, basket.innerHTML)
+    const lenghtList = basket.children.length;
     if (!lenghtList) {
         // если корзина пуста (false), то скрыть её
         cart.setAttribute('style', 'display: none;');
@@ -85,46 +78,20 @@ function viewBasket() {
     }
 }
 
-function moveImage(object, cords) {
-    // функция движения картинок
-    // console.log('object', cords.kfc)
-    // const image = object.querySelector('.move__image');
-    let left = cords.x1;
-    let top = cords.y1;
-    // console.log('Запуск движения left=', left, 'top=', top)
-    let idInterval = setTimeout(function move() {
-        object.style.cssText = `top: ${top}px; left: ${left}px;`;
-        // top = top - 5 * cords.kfc;
-        left = left + 5;
-        if (left < 300) {
-            idInterval = setTimeout(move, 100);
-        }
-    }, 100);
-}
-
-function cordsRectangle(target, elementBasket) {
+function cordsRectangle(target) {
+    // определяем координаты начало движения картинки
     const elementProduct = target.closest('.product');
     const elementImage = elementProduct.querySelector('.product__image');
     const cordsProductImage = elementImage.getBoundingClientRect();
-    // console.log('кординаты картинки начала', cordsProductImage, elementImage);
-    // const x1 =  cordsProductImage.x;
-    // const y1 =  cordsProductImage.y;
-    // const height = cordsProductImage.y + cordsProductImage.height;
-    // console.log('Начало: ', 'x1=', x1, 'y1=', y1, 'height=', height);
-
-    const imageBasket = elementBasket.querySelector('.cart__product-image')
-    const cordsImageBasket = imageBasket.getBoundingClientRect();
-
     const object = {
         x1: cordsProductImage.x + window.pageXOffset,
         y1: cordsProductImage.y + window.pageYOffset,
-        kfc: cordsProductImage.width / cordsProductImage.height,
     };
     return object;
 }
 
 function addImageMove(image, cords) {
-    // создаем прямоугольную зону для движения картинки
+    // добавляем картинку для анимации
     const animation = document.querySelector('.animation');
     const div = `
             <div class="animation__rectangle_move">
@@ -137,4 +104,62 @@ function addImageMove(image, cords) {
     return imageObject;
 }
 
+function moveImage(rectangle, cords, elementBasket) {
+    // логика движения изображения в корзину
+    let left = cords.x1;
+    let top = cords.y1;
+    let idInterval = setTimeout(function move() {
+        const cordsBasket = elementBasket.getBoundingClientRect();
+        const endX = cordsBasket.left + window.pageXOffset;
+        const endY = cordsBasket.top + 15 + window.pageYOffset;
+        let botX, botY;
+        if ((endX - left) > (top - endY)) {
+            botX = 2;
+            botY = 1;
+        } else {
+            botX = 1;
+            botY = 2;
+        }
+        if ((top > endY) || (left < endX)) {
+            if (left < endX) {
+                left = left + botX;
+            }
+            if (top > endY) {
+                top = top - botY;
+            }
+            rectangle.style.cssText = `top: ${top}px; left: ${left}px;`;
+            idInterval = setTimeout(move, 1);
+        } else {
+            clearTimeout(idInterval);
+            rectangle.parentElement.outerHTML = '';
+        }
+    }, 1);
+}
+
+function deleteButton(basket) {
+    // создаем прослушку кнопки для уменьшения количества товара для текущего элемента
+    const decrise = basket.querySelector('.cart__product-decrise');
+    decrise.addEventListener('click', (event) => {
+        // обработчик события для уменьшения количества товара в корзине
+        const newValue = event.target.parentElement.querySelector('.cart__product-count');
+        newValue.textContent = Number(newValue.textContent) - 1;
+        if (newValue.textContent == '0') {
+            // удаление элемента из корзины
+            const deleteElement = event.target.parentElement;
+            deleteElement.outerHTML = '';
+            viewBasket();
+            return;
+        }
+        localStorage.setItem(`basketStorage`, basket.closest('.cart__products').innerHTML);
+    });
+}
+
+const storage = document.querySelector('.cart__products');
+storage.innerHTML = localStorage.getItem(`basketStorage`);
+if (storage.children.length) {
+    const basket = document.querySelectorAll('.cart__product');
+    basket.forEach((element) => {
+        deleteButton(element);
+    })
+}
 viewBasket();

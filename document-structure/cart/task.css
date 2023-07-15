@@ -40,10 +40,6 @@ body {
   opacity: 0.8;
 }
 
-.products{
-  z-index: 2;
-}
-
 .product {
   display: flex;
   flex-wrap: wrap;
