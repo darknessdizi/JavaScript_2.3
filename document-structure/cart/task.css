@@ -34,6 +34,7 @@ body {
   border: 3px solid rgb(56, 56, 56);
   background-color: rgb(250, 166, 180);
   margin: 0px 20px 0px 10px;
+  cursor: pointer;
 }
 
 .cart__product-decrise:hover {
