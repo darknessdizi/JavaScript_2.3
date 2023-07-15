@@ -52,9 +52,9 @@ elementAdd.forEach((element) => {
             const elementBasket = basket.querySelector('.cart__product');
             viewBasket();
             const cords = cordsRectangle(event.target, elementBasket);
-            console.log(cords);
-            const rectangle = addRectangle(url, cords);
-            console.log(rectangle);
+            // console.log(cords);
+            const rectangle = addImageMove(url, cords);
+            // console.log(rectangle);
             moveImage(rectangle, cords);
             // создаем кнопку для уменьшения количества товара для текущего элемента
             const decrise = basket.querySelector('.cart__product-decrise');
@@ -85,20 +85,17 @@ function viewBasket() {
     }
 }
 
-viewBasket();
-
 function moveImage(object, cords) {
     // функция движения картинок
-    const image = object.querySelector('.move__image');
+    // console.log('object', cords.kfc)
+    // const image = object.querySelector('.move__image');
     let left = cords.x1;
     let top = cords.y1;
     // console.log('Запуск движения left=', left, 'top=', top)
     let idInterval = setTimeout(function move() {
-        image.setAttribute('style', `top: ${top}px; left: ${left}px;`)
-        // top = top + 5;
+        object.style.cssText = `top: ${top}px; left: ${left}px;`;
+        // top = top - 5 * cords.kfc;
         left = left + 5;
-        // const atr = image.getAttribute('style').slice(6, -3)
-        // console.log('Идет движение left=', left, 'top=', top)
         if (left < 300) {
             idInterval = setTimeout(move, 100);
         }
@@ -109,56 +106,35 @@ function cordsRectangle(target, elementBasket) {
     const elementProduct = target.closest('.product');
     const elementImage = elementProduct.querySelector('.product__image');
     const cordsProductImage = elementImage.getBoundingClientRect();
-    console.log('кординаты картинки начала', cordsProductImage, elementImage);
-    const x1 =  cordsProductImage.x;
-    const y1 =  cordsProductImage.y;
-    const height = cordsProductImage.y + cordsProductImage.height;
-    console.log('Начало: ', 'x1=', x1, 'y1=', y1, 'height=', height);
+    // console.log('кординаты картинки начала', cordsProductImage, elementImage);
+    // const x1 =  cordsProductImage.x;
+    // const y1 =  cordsProductImage.y;
+    // const height = cordsProductImage.y + cordsProductImage.height;
+    // console.log('Начало: ', 'x1=', x1, 'y1=', y1, 'height=', height);
 
     const imageBasket = elementBasket.querySelector('.cart__product-image')
     const cordsImageBasket = imageBasket.getBoundingClientRect();
-    // console.log('кординаты картинки конца', cordsImageBasket);
-    const x2 =  cordsImageBasket.x;
-    const y2 =  cordsImageBasket.y;
-    const width = cordsImageBasket.x + cordsImageBasket.width;
-    console.log('Конец: ', 'x2=', x2, 'y2=', y2, 'width=', width);
 
     const object = {
-        x1: cordsProductImage.x,
-        y1: cordsProductImage.y,
-        x2: cordsImageBasket.x,
-        y2: cordsImageBasket.y,
-        width: cordsImageBasket.x + cordsImageBasket.width - cordsProductImage.x,
-        height: cordsProductImage.y + cordsProductImage.height - cordsImageBasket.y,
+        x1: cordsProductImage.x + window.pageXOffset,
+        y1: cordsProductImage.y + window.pageYOffset,
+        kfc: cordsProductImage.width / cordsProductImage.height,
     };
     return object;
 }
 
-function addRectangle(image, cords) {
+function addImageMove(image, cords) {
     // создаем прямоугольную зону для движения картинки
     const animation = document.querySelector('.animation');
     const div = `
-        <div class="animation__rectangle">
             <div class="animation__rectangle_move">
                 <img src="${image}" alt="" class="move__image">
             </div>
-        </div>
     `;
     animation.insertAdjacentHTML('afterbegin', div);
-    // добавляем стили для движущихся картинок
-    const object = animation.querySelector('.animation__rectangle');
-    const style = `
-        width: ${cords.width}px;
-        height: ${cords.height}px;
-        top: ${cords.y2}px;
-        left: ${cords.x1}px;
-    `;
-    object.setAttribute('style', style);
-    const imageObject = object.querySelector('.move__image');
-    const styleImage = `
-        top: ${cords.y1}px;
-        left: ${cords.x1}px;
-    `;
-    imageObject.setAttribute('style', styleImage);
-    return object;
+    const imageObject = animation.querySelector('.move__image');
+    imageObject.style.cssText = `top: ${cords.y1}px; left: ${cords.x1}px;`;
+    return imageObject;
 }
+
+viewBasket();
