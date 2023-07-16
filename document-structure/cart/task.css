@@ -27,7 +27,7 @@ body {
   object-fit: contain;
 }
 
-.cart__product-decrise {
+.cart__product-decrease {
   display: flex;
   justify-content: center;
   border-radius: 50%;
@@ -37,7 +37,7 @@ body {
   cursor: pointer;
 }
 
-.cart__product-decrise:hover {
+.cart__product-decrease:hover {
   opacity: 0.8;
 }
 

@@ -35,13 +35,13 @@ elementAdd.forEach((element) => {
             if (item.dataset.id == id) {
                 return true;
             }
-        })
+        });
         if (productBasket) {
             // если элемент уже есть в корзине увеличиваем значение переменной
             const count = productBasket.querySelector('.cart__product-count');
             count.textContent = Number(count.textContent) + Number(value);
             const cords = cordsRectangle(event.target);
-            const rectangle = addImageMove(url, cords);
+            const rectangle = addImageHtml(url, cords);
             moveImage(rectangle, cords, productBasket);
             localStorage.setItem(`basketStorage`, basket.innerHTML);
         } else {
@@ -50,14 +50,14 @@ elementAdd.forEach((element) => {
                 <div class="cart__product" data-id="${id}">
                     <img class="cart__product-image" src="${url}">
                     <div class="cart__product-count">${value}</div>
-                    <div class="cart__product-decrise">Убрать</div>
+                    <div class="cart__product-decrease">Убрать</div>
                 </div>
             `;
             basket.insertAdjacentHTML('afterbegin', text);
             const elementBasket = basket.querySelector('.cart__product');
             viewBasket();
             const cords = cordsRectangle(event.target);
-            const rectangle = addImageMove(url, cords);
+            const rectangle = addImageHtml(url, cords);
             moveImage(rectangle, cords, elementBasket);
             deleteButton(basket);
         }
@@ -68,7 +68,7 @@ function viewBasket() {
     // обновление состояния видимости корзины
     const cart = document.querySelector('.cart');
     const basket = document.querySelector('.cart__products');
-    localStorage.setItem(`basketStorage`, basket.innerHTML)
+    localStorage.setItem(`basketStorage`, basket.innerHTML);
     const lenghtList = basket.children.length;
     if (!lenghtList) {
         // если корзина пуста (false), то скрыть её
@@ -90,7 +90,7 @@ function cordsRectangle(target) {
     return object;
 }
 
-function addImageMove(image, cords) {
+function addImageHtml(image, cords) {
     // добавляем картинку для анимации
     const animation = document.querySelector('.animation');
     const div = `
@@ -112,20 +112,20 @@ function moveImage(rectangle, cords, elementBasket) {
         const cordsBasket = elementBasket.getBoundingClientRect();
         const endX = cordsBasket.left + window.pageXOffset;
         const endY = cordsBasket.top + 15 + window.pageYOffset;
-        let botX, botY;
+        let stepX, stepY;
         if ((endX - left) > (top - endY)) {
-            botX = 2;
-            botY = 1;
+            stepX = 4;
+            stepY = 1;
         } else {
-            botX = 1;
-            botY = 2;
+            stepX = 1;
+            stepY = 4;
         }
         if ((top > endY) || (left < endX)) {
             if (left < endX) {
-                left = left + botX;
+                left = left + stepX;
             }
             if (top > endY) {
-                top = top - botY;
+                top = top - stepY;
             }
             rectangle.style.cssText = `top: ${top}px; left: ${left}px;`;
             idInterval = setTimeout(move, 1);
@@ -136,9 +136,9 @@ function moveImage(rectangle, cords, elementBasket) {
     }, 1);
 }
 
-function deleteButton(basket) {
+function deleteButton(element) {
     // создаем прослушку кнопки для уменьшения количества товара для текущего элемента
-    const decrise = basket.querySelector('.cart__product-decrise');
+    const decrise = element.querySelector('.cart__product-decrease');
     decrise.addEventListener('click', (event) => {
         // обработчик события для уменьшения количества товара в корзине
         const newValue = event.target.parentElement.querySelector('.cart__product-count');
@@ -150,7 +150,7 @@ function deleteButton(basket) {
             viewBasket();
             return;
         }
-        localStorage.setItem(`basketStorage`, basket.closest('.cart__products').innerHTML);
+        localStorage.setItem(`basketStorage`, element.closest('.cart__products').innerHTML);
     });
 }
 
@@ -160,6 +160,6 @@ if (storage.children.length) {
     const basket = document.querySelectorAll('.cart__product');
     basket.forEach((element) => {
         deleteButton(element);
-    })
+    });
 }
 viewBasket();

@@ -7,15 +7,15 @@ links.forEach((element) => {
 function showText(event) {
     event.preventDefault();
     // убираем активные подсказки, кроме текущей
-    const allDiv = document.querySelectorAll('div.tooltip_active')
+    const allDiv = document.querySelectorAll('div.tooltip_active');
     allDiv.forEach((element) => {
         if (element.parentElement != event.target) {
-            element.classList.remove('tooltip_active')
+            element.classList.remove('tooltip_active');
         }
-    })
+    });
 
     const cords = coordinate(event.target);
-    const nextDiv = event.target.querySelector('div')
+    const nextDiv = event.target.querySelector('div');
     if (nextDiv) {
         nextDiv.classList.toggle('tooltip_active');
         nextDiv.style.left = cords.x + 'px';
